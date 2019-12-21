@@ -209,7 +209,7 @@ end )
 local host_timescale = convar( "host_timescale", "1", nil, nil,
                                "Prescales the clock by this amount" )
 
-function love.update( dt )
+function update( dt )
 	profile.push( "update" )
 
 	dt = host_timescale:getNumber() * dt
@@ -234,3 +234,5 @@ function love.update( dt )
 
 	profile.pop( "update" )
 end
+
+love.update = update

@@ -6,6 +6,7 @@
 
 local debug     = debug
 local engine    = engine
+local convar    = convar
 local ipairs    = ipairs
 local love      = love
 local print     = print
@@ -60,25 +61,38 @@ function quit()
 	_G._SERVER = nil
 end
 
+local tickrate = convar( "tickrate", 20, nil, nil,
+                     "Sets the server tick rate" )
+
+local _accumulator = 0
+
 function update( dt )
 	local game   = _G.game and _G.game.server or nil
 	local entity = _G.entity
+	local network = engine.server.network
 
 	if ( game ) then
 		game.update( dt )
 
 		if ( entity ) then
 			local entities = entity.getAll()
-			for _, entity in ipairs( entities ) do
-				entity:update( dt )
+			for _, ent in ipairs( entities ) do
+				ent:update( dt )
 			end
 		end
 	end
 
-	local network = engine.server.network
-	if ( network ) then
-		network.update( dt )
+	local timestep = 1 / tickrate:getNumber()
+	_accumulator = _accumulator + dt
+
+	while ( _accumulator >= timestep ) do
+		engine.server.tick( timestep )
+		if ( network ) then
+			network.tick( timestep )
+		end
+		_accumulator = _accumulator - timestep
 	end
+
 end
 
 local function error_printer(msg, layer)

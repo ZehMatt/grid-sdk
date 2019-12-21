@@ -78,24 +78,11 @@ function shutdownServer()
 	collectgarbage()
 end
 
-local tickrate = convar( "tickrate", 20, nil, nil,
-                         "Sets the server tick rate" )
-
-_accumulator = _accumulator or 0
-
-function update( dt )
+function tick( dt )
 	if ( _host == nil ) then
 		return
 	end
-
-	local timestep = 1 / tickrate:getNumber()
-	_accumulator = _accumulator + dt
-
-	while ( _accumulator >= timestep ) do
-		engine.server.tick( timestep )
-		pollEvents()
-		_accumulator = _accumulator - timestep
-	end
+	pollEvents()
 end
 
 function updateSentReceived()

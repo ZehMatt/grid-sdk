@@ -90,24 +90,11 @@ function sendToServer( data, channel, flag )
 	_server:send( data, channel, flag )
 end
 
-local cl_updaterate = convar( "cl_updaterate", 20, nil, nil,
-                              "Sets the client tick rate" )
-
-_accumulator = _accumulator or 0
-
-function update( dt )
+function tick( dt )
 	if ( _host == nil ) then
 		return
 	end
-
-	local timestep = 1 / cl_updaterate:getNumber()
-	_accumulator = _accumulator + dt
-
-	while ( _accumulator >= timestep ) do
-		engine.client.tick( timestep )
-		pollEvents()
-		_accumulator = _accumulator - timestep
-	end
+	pollEvents()
 end
 
 function updateSentReceived()

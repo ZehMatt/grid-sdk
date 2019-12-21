@@ -151,9 +151,16 @@ function resize( w, h )
 	gui.invalidateTree()
 end
 
+
+local tickrate = convar( "tickrate", 20, nil, nil,
+                     "Sets the server tick rate" )
+
+local _accumulator = 0
+
 function update( dt )
 	local _CLIENT = _CLIENT
 	local _SERVER = _SERVER or _G._SERVER
+	local network = engine.client.network
 
 	if ( _CLIENT and not _SERVER ) then
 		local game   = _G.game and _G.game.client or nil
@@ -171,13 +178,20 @@ function update( dt )
 		end
 	end
 
-	local network = engine.client.network
-	if ( network ) then
-		network.update( dt )
+	local timestep = 1 / tickrate:getNumber()
+	_accumulator = _accumulator + dt
+
+	while ( _accumulator >= timestep ) do
+		engine.client.tick( timestep )
+		if ( network ) then
+			network.tick( timestep )
+		end
+		_accumulator = _accumulator - timestep
 	end
+
 end
 
-local r_focus = convar( "r_focus", "1", nil, nil,
+local r_focus = convar( "r_focus", "0", nil, nil,
                         "Draw only when the engine has focus" )
 
 function draw()
